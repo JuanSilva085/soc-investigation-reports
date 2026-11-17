@@ -1,4 +1,4 @@
-Repositório dedicado à documentação de análises de alertas, triagem de incidentes e investigação de ameaças realizadas em ambientes simulados de laboratório (**LetsDefend**, **TryHackMe** e **Blue Team Labs Online**).
+Repositório dedicado à documentação de análises de alertas, triagem de incidentes e investigação de ameaças realizadas em ambientes simulados de laboratório (**LetsDefend** e **TryHackMe**).
 
 O objetivo deste projeto é aplicar metodologias reais de **SOC N1**, incluindo correlação de logs, enriquecimento de Indicadores de Comprometimento (IoCs), mapeamento na matriz **MITRE ATT&CK** e elaboração de relatórios executivos e técnicos.
 
