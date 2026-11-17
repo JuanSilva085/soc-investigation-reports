@@ -1,0 +1,29 @@
+
+# Relatório de Investigação: Relação Incomum entre Processos Pai e Filho (Sysmon)
+
+**Data do Evento:** 17/11/2026 | **Plataforma:** TryHackMe
+**Fonte de Dados:** Sysmon (Event ID 1) | **Veredito:** Falso Positivo (False Positive)
+
+## 1. Resumo Executivo
+
+Foi gerado um alerta de criação de processo suspeito no endpoint **win-3455** envolvendo a relação entre `services.exe` (processo pai) e `WUDFHost.exe` (processo filho). A análise do caminho de execução, diretório de trabalho e parâmetros da linha de comando confirmou tratar-se de uma operação legítima do framework de drivers do Windows (UMDF). O incidente foi encerrado como **Falso Positivo**, sem necessidade de contenção ou escalonamento.
+
+## 2. Detalhes do Alerta e Evidências
+
+* **Host Afetado:** `win-3455`
+* **Timestamp:** `11/17/2026 00:33:11.664`
+* **Sysmon Event Code:** `1` (Process Creation)
+* **Processo Filho:** `WUDFHost.exe` (PID: `3710`)
+* **Processo Pai:** `services.exe` (PID: `3817`)
+* **Diretório de Trabalho:** `C:\Windows\system32\`
+* **Linha de Comando:** `"C:\Windows\System32\WUDFHost.exe" -HostGUID:{24b7eef1-ada5-453b-a5a6-93007dca6fbc} -IoEventPortName:\UMDFCommunicationPorts\WUDF\HostProcess-fd5c32fb-5bb6-4693-82a7-6cec85d58bc4 ... -HostArg:0`
+
+## 3. Análise Técnica (Process Tree & Comportamento)
+
+* **Validação da Hierarquia Pai-Filho:** O `WUDFHost.exe` (*Windows User-Mode Driver Framework Host*) é um binário nativo do Windows responsável por hospedar drivers em modo de usuário. Na arquitetura padrão do sistema operacional, este processo é legitimamente iniciado pelo Gerenciador de Controle de Serviços (`services.exe`).
+* **Integridade do Caminho e Sintaxe:** O binário foi executado a partir do diretório oficial `C:\Windows\System32\`, descartando técnicas de *Masquerading* ou execução em pastas temporárias. Os argumentos `-HostGUID`, `-IoEventPortName` e `-LifetimeId` correspondem à comunicação interna padrão de dispositivos UMDF.
+
+## 4. Ações de Contenção e Recomendação (Tuning)
+
+* **Status:** Encerrado como Falso Positivo no Nível 1; nenhuma ação de isolamento foi aplicada ao host `win-3455`.
+* **Melhoria de Regra (Allowlist):** Recomenda-se adicionar uma exceção na regra de detecção do SIEM para ignorar a criação do processo `C:\Windows\System32\WUDFHost.exe` quando o processo pai for `C:\Windows\System32\services.exe`, reduzindo o ruído operacional da fila.
